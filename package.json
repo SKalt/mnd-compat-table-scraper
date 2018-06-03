@@ -1,0 +1,35 @@
+{
+  "name": "mdn-compat-table-scraper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "directories": {
+    "example": "examples"
+  },
+  "dependencies": {
+    "jquery": "^3.3.1"
+  },
+  "devDependencies": {
+    "eslint-config-google": "^0.9.1",
+    "mocha": "^5.2.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SKalt/mnd-compat-table-scraper.git"
+  },
+  "keywords": [
+    "mdn",
+    "scraper",
+    "browser",
+    "compatibility"
+  ],
+  "author": "Steven Kalt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SKalt/mnd-compat-table-scraper/issues"
+  },
+  "homepage": "https://github.com/SKalt/mnd-compat-table-scraper#readme"
+}
