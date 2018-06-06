@@ -25,3 +25,6 @@ rules:
     - blankLine: always
       prev: block-like
       next: block-like
+  no-unused-vars:
+    - error
+    - ignoreRestSiblings: true
