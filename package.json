@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
+    "debug": "^3.1.0",
     "jquery": "^3.3.1",
     "url-parse": "^1.4.1"
   },
@@ -17,7 +18,8 @@
     "eslint-config-google": "^0.9.1",
     "husky": "^0.14.3",
     "mdn-browser-compat-data": "0.0.40",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "parcel-bundler": "^1.9.6"
   },
   "scripts": {
     "test": "mocha",
