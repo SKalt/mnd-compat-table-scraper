@@ -1,5 +1,8 @@
+/* eslint-disable require-jsdoc */
 import $ from 'cheerio';
-
+import debug from 'debug';
+debug.enable('scraper:*');
+const logger = (name) => debug(`scraper:${name}`);
 /**
  * Return whether we're on MDN
  * @param  {Object} loc window.location
@@ -10,15 +13,38 @@ export const checkUrl = (loc) => loc.host === 'developer.mozilla.org';
 /**
  * Find the desktop and mobile compatability tables
  * @param  {String|Element} html a MDN API document
- * @return {Object} each browser compatibility table.
+ * @return {Object} each browser compatibility table element.
  * @throws {Error} if no compatibility tables are present.
  */
 export function getTables(html) {
-  let table = $(html).find('#AutoCompatibilityTable');
-  if (table.toArray().length) throw new Error('No compatibility table found');
-  let desktop = table.find('#compat-desktop');
-  let mobile = table.find('#compat-mobile');
+  html = $(html);
+  let desktop = html.find('#compat-desktop')[0];
+  let mobile = html.find('#compat-mobile')[0];
+  if (!desktop || !mobile) throw new Error('No compatibility table found');
   return {desktop, mobile};
+}
+
+export function getNotes(html) {
+  const log = logger('get-notes');
+  log('html', [...$(html).find('#Browser_compatibility')]);
+  let notes = [
+    ...$(html).find('#Browser_compatibility')
+      .find('div.htab')
+      .nextUntil('h2, h1, hr', /* <- break at; select only -> */ 'p'),
+  ];
+  log('notes', notes);
+  let results = {};
+  let state = '';
+  for (let el of notes) {
+    let re = /^\s*(\[\s{0,2}\d+\.?\s{0,2}\]|\d\.)(.*)/gm;
+    let [id, text] = (re.exec(el.innerHTML) || []);
+    if (id !== undefined) state = id.replace(/[\[\]\.\s]/g, '');
+    if (el.id) state = e.id.replace(/compatnote_/i, '');
+    if (!results[state]) results[state] = '';
+    if (!text) text = el.innerHTML;
+    results[state] += text;
+  };
+  return results;
 }
 
 
@@ -49,6 +75,7 @@ export const isSupported = (td) => {
     && titled.length < 2
     && /Yes/i.exec(text(td));
 };
+
 
 // const hasVersion = (td) => {
 //   // if it's not empty and not No or Yes
