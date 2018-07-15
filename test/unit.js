@@ -1,10 +1,11 @@
 import {
   checkUrl,
   assembleNotes,
-  getRows,
-  getHeaders,
+  // getRows,
+  // getHeaders,
   getBrowserNames,
   getTables,
+  getFeatureNames,
 } from '../src/scraper/index.js';
 import {urlToPath} from '../src/url-to-path';
 import assert from 'assert';
@@ -56,7 +57,7 @@ describe('getNotes', ()=>{
   });
 });
 describe('getBrowserName', ()=>{
-  it('fuckin works', ()=>{
+  it('works', ()=>{
     let {mobile, desktop} = getTables($1);
     let expected = ['chrome', 'edge', 'firefox', 'ie', 'opera', 'safari'];
     assert.deepEqual(getBrowserNames(desktop, $1), expected);
@@ -70,11 +71,20 @@ describe('getBrowserName', ()=>{
       'samsung',
     ];
     assert.deepEqual(getBrowserNames(mobile, $1), expected);
-
-    // console.log(getHeaders(desktop, $1).map((e) => getBrowserName(e, $1)))
-    //  'chrome', 'edge', 'firefox', 'ie', 'opera', 'safari' ]
-    // console.log(getHeaders(mobile, $1).map((e) => getBrowserName(e, $1)))
-
-
   });
-})
+});
+describe('getFeatureNames', ()=>{
+  let {mobile, desktop} = getTables($1);
+  let expected = [
+    'Basic support',
+    'dir',
+    'display',
+    'href',
+    'mathbackground',
+    'mathcolor',
+    'mode',
+    'overflow',
+  ];
+  assert.deepEqual(getFeatureNames(mobile, $1), expected);
+  assert.deepEqual(getFeatureNames(desktop, $1), expected);
+});

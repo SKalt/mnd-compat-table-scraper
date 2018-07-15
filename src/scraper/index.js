@@ -62,6 +62,13 @@ export function getBrowserNames(table, $) {
   return getHeaders(table, $).slice(1).map((th) => getBrowserName(th, $));
 }
 
+export function getFeatureNames(table, $) {
+  return $(table).find('td:first-child, th:first-child')
+    .toArray().slice(1)
+    .map((el) => $(el).text());
+}
+
+
 export const whats = (el) => {
   const sup = $(el).find('sup').text();
   return sup ? /\[(\d+)\]/.exec(sup)[1] : null; // not much, bro
@@ -89,7 +96,6 @@ export const isSupported = (td) => {
     && titled.length < 2
     && /Yes/i.exec(text(td));
 };
-
 
 // const hasVersion = (td) => {
 //   // if it's not empty and not No or Yes
