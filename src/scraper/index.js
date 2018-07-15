@@ -1,8 +1,7 @@
 /* eslint-disable require-jsdoc */
-import $ from 'cheerio';
 import debug from 'debug';
 debug.enable('scraper:*');
-const logger = (name) => debug(`scraper:${name}`);
+// const logger = (name) => debug(`scraper:${name}`);
 /**
  * Return whether we're on MDN
  * @param  {Object} loc window.location
@@ -12,39 +11,43 @@ export const checkUrl = (loc) => loc.host === 'developer.mozilla.org';
 
 /**
  * Find the desktop and mobile compatability tables
- * @param  {String|Element} html a MDN API document
+ * @param  {Object} $ a MDN API document jquery api
  * @return {Object} each browser compatibility table element.
  * @throws {Error} if no compatibility tables are present.
  */
-export function getTables(html) {
-  html = $(html);
-  let desktop = html.find('#compat-desktop')[0];
-  let mobile = html.find('#compat-mobile')[0];
+export function getTables($) {
+  let desktop = $('#compat-desktop')[0];
+  let mobile = $('#compat-mobile')[0];
   if (!desktop || !mobile) throw new Error('No compatibility table found');
   return {desktop, mobile};
 }
 
-export function getNotes(html) {
-  const log = logger('get-notes');
-  log('html', [...$(html).find('#Browser_compatibility')]);
-  let notes = [
-    ...$(html).find('#Browser_compatibility')
-      .find('div.htab')
-      .nextUntil('h2, h1, hr', /* <- break at; select only -> */ 'p'),
-  ];
-  log('notes', notes);
-  let results = {};
-  let state = '';
-  for (let el of notes) {
-    let re = /^\s*(\[\s{0,2}\d+\.?\s{0,2}\]|\d\.)(.*)/gm;
-    let [id, text] = (re.exec(el.innerHTML) || []);
-    if (id !== undefined) state = id.replace(/[\[\]\.\s]/g, '');
-    if (el.id) state = e.id.replace(/compatnote_/i, '');
-    if (!results[state]) results[state] = '';
-    if (!text) text = el.innerHTML;
-    results[state] += text;
-  };
-  return results;
+let re = /^\s*\[?\s*(\d+)\s*\]?\.?/;
+function getNoteId(el, $) {
+  let attr = ($(el).attr('id') || '').replace(/compatnote_/i, '');
+  const match = $(el).html().match(re) || [];
+  return attr || match[1];
+}
+
+export function getNotesElements($) {
+  return [...$('div.htab').nextUntil('h2, h1, hr', 'p')];
+}
+
+export function getNoteText(el, $) {
+  return $(el).html().replace(re, '').trim().replace(' ', ' ');
+}
+
+export function assembleNote(el, $) {
+  const id = getNoteId(el, $);
+  const text = getNoteText(el, $);
+  return text ? {[id]: text} : null;
+}
+
+export function assembleNotes($) {
+  let notes = getNotesElements($);
+  return notes
+    .map((el) => assembleNote(el, $))
+    .reduce((a, r) => Object.assign(a, r), {});
 }
 
 
