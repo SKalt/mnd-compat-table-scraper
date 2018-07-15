@@ -1,4 +1,11 @@
-import {checkUrl, assembleNotes} from '../src/scraper/index.js';
+import {
+  checkUrl,
+  assembleNotes,
+  getRows,
+  getHeaders,
+  getBrowserNames,
+  getTables,
+} from '../src/scraper/index.js';
 import {urlToPath} from '../src/url-to-path';
 import assert from 'assert';
 // import {readFileSync as rfs} from 'fs';
@@ -7,12 +14,7 @@ import {load} from 'cheerio';
 
 const [$1, $2, $3] = [math, atDoc, mouseEnter]
   .map((html) => load(html, {decodeEntities: false}));
-// import foo from './foo.txt'
-// const rfs = (name) => readFileSync(`${__dirname}/fixtures/${name}`, 'utf8');
 
-// const math = rfs(`${__dirname}/fixtures/mathml-element-math.html`, 'utf8');
-
-// import foo from '../test/fixtures/examples/css-@document.html';
 describe('urlToPath', ()=>{
   it('outputs as expected', ()=>{
     let url = '//developer.mozilla.org/en-US/docs/Web/MathML/Element/math';
@@ -31,7 +33,6 @@ describe('checkUrl', ()=>{
     assert(checkUrl({host: 'developer.mozilla.org'}));
   });
 });
-
 describe('getNotes', ()=>{
   it('returns correctly', ()=>{
     /* eslint-disable max-len */
@@ -54,3 +55,26 @@ describe('getNotes', ()=>{
     assert.deepEqual(assembleNotes($3), expected);
   });
 });
+describe('getBrowserName', ()=>{
+  it('fuckin works', ()=>{
+    let {mobile, desktop} = getTables($1);
+    let expected = ['chrome', 'edge', 'firefox', 'ie', 'opera', 'safari'];
+    assert.deepEqual(getBrowserNames(desktop, $1), expected);
+    expected = [
+      'webview_android',
+      'chrome_android',
+      'edge_mobile',
+      'firefox_android',
+      'opera_android',
+      'safari_ios',
+      'samsung',
+    ];
+    assert.deepEqual(getBrowserNames(mobile, $1), expected);
+
+    // console.log(getHeaders(desktop, $1).map((e) => getBrowserName(e, $1)))
+    //  'chrome', 'edge', 'firefox', 'ie', 'opera', 'safari' ]
+    // console.log(getHeaders(mobile, $1).map((e) => getBrowserName(e, $1)))
+
+
+  });
+})

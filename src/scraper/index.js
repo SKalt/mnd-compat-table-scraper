@@ -1,4 +1,5 @@
 /* eslint-disable require-jsdoc */
+import browserNames from './browser-names.json';
 import debug from 'debug';
 debug.enable('scraper:*');
 // const logger = (name) => debug(`scraper:${name}`);
@@ -50,6 +51,16 @@ export function assembleNotes($) {
     .reduce((a, r) => Object.assign(a, r), {});
 }
 
+export const getRows = (table, $) => $(table).find('tr').toArray();
+export const getHeaders = (table, $) => $(table).find('th').toArray();
+
+export function getBrowserName(th, $) {
+  return browserNames[$(th).text().trim()];
+}
+
+export function getBrowserNames(table, $) {
+  return getHeaders(table, $).slice(1).map((th) => getBrowserName(th, $));
+}
 
 export const whats = (el) => {
   const sup = $(el).find('sup').text();
