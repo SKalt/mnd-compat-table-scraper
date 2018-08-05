@@ -98,12 +98,12 @@ describe('parsing experiment', ()=>{
   it('correctly associates contexts', ()=>{
     let table = getTables($1);
     let notes = assembleNotes($1);
-    // console.log(JSON.stringify(parseTable(table.desktop, notes, $1)[0], null, 2));
+    console.log(JSON.stringify(parseTable(table.desktop, notes, $1)[0], null, 2));
     table = getTables($2);
     let confusing = "<p>61<span class=\"inlineIndicator prefixBox prefixBoxInline\" title=\"prefix\">\n      <a href=\"/en-US/docs/Web/Guide/Prefixes\" title=\"The name of this feature is prefixed with '-moz-' as this\n      browser considers it experimental\">-moz-\n      </a></span><sup><a href=\"#compatNote_1\">1</a></sup> <sup><a href=\"#compatNote_2\">2</a></sup></p><p>1.5 — 61<span class=\"inlineIndicator prefixBox prefixBoxInline\" title=\"prefix\">\n      <a href=\"/en-US/docs/Web/Guide/Prefixes\" title=\"The name of this feature is prefixed with '-moz-' as this\n      browser considers it experimental\">-moz-\n      </a></span></p>"
     let $ = load(confusing);
     console.log(parseCell(confusing, {1: 'foo', 2: 'bar'}, $));
-    // console.log(JSON.stringify(parseTable(table.desktop, {}, $2)[0], null, 2));
+    console.log(JSON.stringify(parseTable(table.desktop, assembleNotes($2), $2)[0], null, 2));
   });
 });
 describe('cell parsing', ()=>{
@@ -162,6 +162,7 @@ describe('cell parsing', ()=>{
     let expected = '4';
     let $ = load(a);
     assert.equal(getNoteReference(a, $), expected);
+    console.log('******************************', parseCell(a, {4: 'foo'}, $));
     assert.deepEqual(parseCell(a, {4: 'foo'}, $).notes, 'foo');
   });
 });

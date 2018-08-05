@@ -3,7 +3,7 @@
 import browserNames from './browser-names.json';
 // import {zip} from '../common/utils.js';
 import debug from 'debug';
-debug.enable('scraper:*');
+// debug.enable('scraper:*');
 const logger = (name) => debug(`scraper:${name}`);
 /**
  * Return whether we're on MDN
@@ -106,7 +106,7 @@ export function parseCell(cell, notes={}, $) {
     return $(cell).html()
       .split(/<\s*br\s*\/>/ig)
       .map((str) => parseCell(`<td>${str}</td>`, notes, $))
-      .reduce(toOneIfPossible);
+      .reduce(toOneIfPossible, []);
   }
 
   let text = getOwnText(cell, $).trim();
@@ -127,7 +127,9 @@ export function parseCell(cell, notes={}, $) {
   // get the number|range|true|false|null
   debugger;
   let prefix = $(cell).find('[class*="prefix"]').text().trim();
-  let refs = getNoteReference(cell, $).map((ref) => notes[ref]).join('\n');
+  let refs = getNoteReference(cell, $)
+    .map((ref) => notes[ref])
+    .reduce(toOneIfPossible, []);
   return Object.assign(
     {},
     parseCellText(text || $(cell).find(':not([class*="prefix"] *):not(sup)').text()),
@@ -201,6 +203,6 @@ export const isSupported = (td) => {
     && /Yes/i.exec(text(td));
 };
 
-function toOneIfPossible(arr) {
+function toOneIfPossible(acc, curr, index, arr) {
   return arr.length === 1 ? arr[0] : arr;
 }
