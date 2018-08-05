@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/main.js",
+  "engines": {
+    "node": ">=10"
+  },
   "directories": {
     "example": "examples"
   },
@@ -10,7 +13,7 @@
     "cheerio": "^1.0.0-rc.2",
     "debug": "^3.1.0",
     "jquery": "^3.3.1",
-    "url-parse": "^1.4.1"
+    "url-parse": "^1.4.3"
   },
   "devDependencies": {
     "ajv": "^6.5.0",
@@ -19,12 +22,18 @@
     "husky": "^0.14.3",
     "mdn-browser-compat-data": "0.0.40",
     "mocha": "^5.2.0",
+    "parcel": "^1.9.7",
     "parcel-bundler": "^1.9.6"
   },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions"
+  ],
   "scripts": {
-    "test": "mocha",
-    "precommit": "npm run lint",
-    "lint": "eslint src/"
+    "pretest": "parcel build ./test/unit.js",
+    "test": "mocha ./dist/unit.js",
+    "prepush": "npm run lint && npm run test",
+    "lint": "eslint src/ --fix"
   },
   "repository": {
     "type": "git",

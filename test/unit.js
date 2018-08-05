@@ -6,6 +6,9 @@ import {
   getBrowserNames,
   getTables,
   getFeatureNames,
+  parseTable,
+  parseCell,
+  getNoteReference,
 } from '../src/scraper/index.js';
 import {urlToPath} from '../src/url-to-path';
 import assert from 'assert';
@@ -74,17 +77,91 @@ describe('getBrowserName', ()=>{
   });
 });
 describe('getFeatureNames', ()=>{
-  let {mobile, desktop} = getTables($1);
-  let expected = [
-    'Basic support',
-    'dir',
-    'display',
-    'href',
-    'mathbackground',
-    'mathcolor',
-    'mode',
-    'overflow',
-  ];
-  assert.deepEqual(getFeatureNames(mobile, $1), expected);
-  assert.deepEqual(getFeatureNames(desktop, $1), expected);
+  it('returns as expected', ()=>{
+    let {mobile, desktop} = getTables($1);
+    let expected = [
+      'Basic support',
+      'dir',
+      'display',
+      'href',
+      'mathbackground',
+      'mathcolor',
+      'mode',
+      'overflow',
+    ];
+    assert.deepEqual(getFeatureNames(mobile, $1), expected);
+    assert.deepEqual(getFeatureNames(desktop, $1), expected);
+  });
+});
+
+describe('parsing experiment', ()=>{
+  it('correctly associates contexts', ()=>{
+    let table = getTables($1);
+    let notes = assembleNotes($1);
+    // console.log(JSON.stringify(parseTable(table.desktop, notes, $1)[0], null, 2));
+    table = getTables($2);
+    let confusing = "<p>61<span class=\"inlineIndicator prefixBox prefixBoxInline\" title=\"prefix\">\n      <a href=\"/en-US/docs/Web/Guide/Prefixes\" title=\"The name of this feature is prefixed with '-moz-' as this\n      browser considers it experimental\">-moz-\n      </a></span><sup><a href=\"#compatNote_1\">1</a></sup> <sup><a href=\"#compatNote_2\">2</a></sup></p><p>1.5 — 61<span class=\"inlineIndicator prefixBox prefixBoxInline\" title=\"prefix\">\n      <a href=\"/en-US/docs/Web/Guide/Prefixes\" title=\"The name of this feature is prefixed with '-moz-' as this\n      browser considers it experimental\">-moz-\n      </a></span></p>"
+    let $ = load(confusing);
+    console.log(parseCell(confusing, {1: 'foo', 2: 'bar'}, $));
+    // console.log(JSON.stringify(parseTable(table.desktop, {}, $2)[0], null, 2));
+  });
+});
+describe('cell parsing', ()=>{
+  it('correctly parses No', ()=>{
+    const a = `
+    <td class="no-support">
+      <span title="No support">
+          No
+      </span>
+    </td>`;
+    const b = `
+    <td>
+      <span>
+          No
+      </span>
+    </td>`;
+    let $ = load(a);
+    assert.deepEqual(parseCell(a, {}, $), {version_added: false});
+    $ = load(b);
+    assert.deepEqual(parseCell(b, {}, $), {version_added: false});
+  });
+  it('correctly parses prefixes', ()=>{
+    const a = `
+    <td class="full-support">
+      6
+      <span class="inlineIndicator prefixBox prefixBoxInline" title="prefix">
+        <a href="/en-US/docs/Web/Guide/Prefixes" title="The name of this feature is prefixed with '-moz-' as this
+        browser considers it experimental">
+          -moz-
+        </a>
+      </span>
+    </td>
+    `;
+    assert.equal(parseCell(a, {}, $1).prefix, '-moz-');
+    // const b = $2('#double-prefix');
+    // console.log($2(b).text());
+  });
+  it('parses unknowns', ()=>{
+    let idk = `
+    <td>
+      <span style="color: rgb(255, 153, 0);" title="Compatibility unknown; please update this.">
+        ?
+      </span>
+    </td>`;
+    assert.deepEqual(parseCell(idk, {}, $1), {version_added: null});
+  });
+  it('parses note references', ()=>{
+    let a = `
+    <td>
+      <a href="/en-US/Firefox/Releases/44" title="Released on 2016-01-26.">
+        44.0
+      </a>
+      (44.0)
+      <sup>[4]</sup>
+    </td>`;
+    let expected = '4';
+    let $ = load(a);
+    assert.equal(getNoteReference(a, $), expected);
+    assert.deepEqual(parseCell(a, {4: 'foo'}, $).notes, 'foo');
+  });
 });
