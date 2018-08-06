@@ -1,3 +1,4 @@
+/* eslint-disable no-irregular-whitespace */
 import {
   checkUrl,
   assembleNotes,
@@ -95,15 +96,46 @@ describe('getFeatureNames', ()=>{
 });
 
 describe('parsing experiment', ()=>{
-  it('correctly associates contexts', ()=>{
+  it('correctly parses tables', ()=>{
     let table = getTables($1);
     let notes = assembleNotes($1);
-    console.log(JSON.stringify(parseTable(table.desktop, notes, $1)[0], null, 2));
+    parseTable(table.desktop, notes, $1);
     table = getTables($2);
-    let confusing = "<p>61<span class=\"inlineIndicator prefixBox prefixBoxInline\" title=\"prefix\">\n      <a href=\"/en-US/docs/Web/Guide/Prefixes\" title=\"The name of this feature is prefixed with '-moz-' as this\n      browser considers it experimental\">-moz-\n      </a></span><sup><a href=\"#compatNote_1\">1</a></sup> <sup><a href=\"#compatNote_2\">2</a></sup></p><p>1.5 — 61<span class=\"inlineIndicator prefixBox prefixBoxInline\" title=\"prefix\">\n      <a href=\"/en-US/docs/Web/Guide/Prefixes\" title=\"The name of this feature is prefixed with '-moz-' as this\n      browser considers it experimental\">-moz-\n      </a></span></p>"
+    let confusing = `
+    <p>
+      61
+      <span class=\"inlineIndicator prefixBox prefixBoxInline\" title=\"prefix\">
+        <a href=\"/en-US/docs/Web/Guide/Prefixes\"
+        title=\"The name of this feature is prefixed with '-moz-' as this
+        browser considers it experimental\">
+          -moz-
+        </a>
+      </span>
+      <sup>
+        <a href=\"#compatNote_1\">1</a>
+      </sup>
+      <sup><a href=\"#compatNote_2\">2</a></sup>
+    </p>
+    <p>
+      1.5 — 61
+      <span class=\"inlineIndicator prefixBox prefixBoxInline\"
+      title=\"prefix\">
+        <a href=\"/en-US/docs/Web/Guide/Prefixes\"
+        title=\"The name of this feature is prefixed with '-moz-' as this
+        browser considers it experimental\">
+          -moz-
+        </a>
+      </span>
+    </p>`;
     let $ = load(confusing);
-    console.log(parseCell(confusing, {1: 'foo', 2: 'bar'}, $));
-    console.log(JSON.stringify(parseTable(table.desktop, assembleNotes($2), $2)[0], null, 2));
+    assert.deepEqual(
+      parseCell(confusing, {1: 'foo', 2: 'bar'}, $),
+      [
+        {version_added: '61', notes: ['foo', 'bar'], prefix: '-moz-'},
+        {version_added: '1.5', version_removed: '61', prefix: '-moz-'},
+      ]
+    );
+    parseTable(table.desktop, assembleNotes($2), $2);
   });
 });
 describe('cell parsing', ()=>{
@@ -138,8 +170,6 @@ describe('cell parsing', ()=>{
     </td>
     `;
     assert.equal(parseCell(a, {}, $1).prefix, '-moz-');
-    // const b = $2('#double-prefix');
-    // console.log($2(b).text());
   });
   it('parses unknowns', ()=>{
     let idk = `
@@ -162,7 +192,6 @@ describe('cell parsing', ()=>{
     let expected = '4';
     let $ = load(a);
     assert.equal(getNoteReference(a, $), expected);
-    console.log('******************************', parseCell(a, {4: 'foo'}, $));
     assert.deepEqual(parseCell(a, {4: 'foo'}, $).notes, 'foo');
   });
 });
