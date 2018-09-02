@@ -1,5 +1,4 @@
 [
-  "webview_android",
   "chrome",
   "chrome_android",
   "edge",
@@ -15,5 +14,6 @@
   "safari_ios",
   "samsunginternet_android",
   "uc_android",
-  "uc_chinese_android"
+  "uc_chinese_android",
+  "webview_android"
 ]

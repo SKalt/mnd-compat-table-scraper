@@ -1,4 +1,4 @@
-/* eslint-disable no-irregular-whitespace */
+/* eslint-disable no-irregular-whitespace, require-jsdoc */
 import {
   checkUrl,
   assembleNotes,
@@ -10,16 +10,40 @@ import {
   parseTable,
   parseCell,
   getNoteReference,
+  scrape,
 } from '../src/scraper/index.js';
+// import path from 'path';
 import {urlToPath} from '../src/url-to-path';
 import assert from 'assert';
 // import {readFileSync as rfs} from 'fs';
 import {math, atDoc, mouseEnter} from './fixtures';
 import {load} from 'cheerio';
-
+import Ajv from 'ajv';
 const [$1, $2, $3] = [math, atDoc, mouseEnter]
   .map((html) => load(html, {decodeEntities: false}));
+const logJson = (obj) => console.log(JSON.stringify(obj, null, 2));
+const ajv = new Ajv({allErrors: true});
+function testSchema(json) {
+  let valid = ajv.validate(
+    require('./../schemas/compat-data.schema.json'),
+    json,
+  );
 
+  if (valid) {
+    console.log('\x1b[32m  JSON schema – OK \x1b[0m');
+    return false;
+  } else {
+    console.error(
+      `\x1b[31m  JSON schema – ${ajv.errors.length} error(s)\x1b[0m`
+    );
+    console.error(ajv.errors);
+    console.error('   ' + ajv.errorsText(ajv.errors, {
+      separator: '\n    ',
+      dataVar: 'item',
+    }));
+    return true;
+  }
+}
 describe('urlToPath', ()=>{
   it('outputs as expected', ()=>{
     let url = '//developer.mozilla.org/en-US/docs/Web/MathML/Element/math';
@@ -135,7 +159,9 @@ describe('parsing experiment', ()=>{
         {version_added: '1.5', version_removed: '61', prefix: '-moz-'},
       ]
     );
-    parseTable(table.desktop, assembleNotes($2), $2);
+    let json = parseTable(table.desktop, assembleNotes($2), $2);
+    logJson(json);
+    testSchema(json);
   });
 });
 describe('cell parsing', ()=>{

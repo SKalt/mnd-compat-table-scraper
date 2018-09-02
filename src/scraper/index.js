@@ -1,6 +1,7 @@
 /* eslint-disable require-jsdoc, max-len */
 /* eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }]*/
 import browserNames from './browser-names.json';
+import allBrowsers from './all-browsers.json';
 /**
  * Return whether we're on MDN
  * @param  {Object} loc window.location
@@ -124,27 +125,37 @@ export function parseCell(cell, notes={}, $) {
   );
 }
 
+function sortByBrowserName(support) {
+  return allBrowsers
+    .map((name) => ({[name]: support[name]}))
+    .reduce((a, r) => Object.assign(a, r), {});
+}
+
+export function parseRow(tr, notes={}, browserNames=[], $) {
+  let [featureEl, ...supportEls] = $(tr).find('td').toArray();
+  let featureName = $(featureEl).text().trim();
+  let result = {
+    __compat: {
+      support: Object.assign(
+        ...supportEls.map(
+          (el, index) => {
+            let browser = browserNames[index];
+            return {[browser]: parseCell(el, notes, $)};
+          }
+        )
+      ),
+    },
+  };
+  if (!featureName.match(/basic\s+support/i)) result = {[featureName]: result};
+  return result;
+}
+
 export function parseTable(table, notes={}, $) {
   const [header, ...rows] = $(table).find('tr').toArray();
   const browserNames = getBrowserNames(header, $);
   return Object.assign(
     {},
-    ...rows.map(
-      (tr) => {
-        let [featureEl, ...supportEls] = $(tr).find('td').toArray();
-        let featureName = $(featureEl).text().trim();
-        return {
-          [featureName]: Object.assign(
-            ...supportEls.map(
-              (el, index) => {
-                let browser = browserNames[index];
-                return {[browser]: parseCell(el, notes, $)};
-              }
-            )
-          ),
-        };
-      }
-    )
+    ...rows.map((tr) => parseRow(tr, notes, browserNames, $))
   );
 }
 
@@ -162,3 +173,14 @@ export function scrape($) {
     ...[mobile, desktop].map((el) => parseTable(el, notes, $))
   );
 }
+
+// export function status(featureEl, href = '', $) {
+//   let a = $(featureEl).find('a')
+//   href = href.replace('/[a-z]{2}-[A-Z]{2}/', '/').replace(/#.+$/, '');
+//   if (a.length > 0 && a[0].href.test(href))
+//   const check = (selector) => Boolean($(selector).toArray().length);
+//   let experimental = check('.notice.experimental');
+//   let standard_track = !experimental && check('#Specifications');
+//   let deprecated = !experimental && !standard_track && check('.deprecated');
+//   return {experimental, standard_track, deprecated};
+// };
