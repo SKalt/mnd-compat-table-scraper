@@ -13,6 +13,7 @@ import {
   scrape,
 } from '../src/scraper/index.js';
 // import path from 'path';
+import {mathml} from './temp.json';
 import {urlToPath} from '../src/url-to-path';
 import assert from 'assert';
 // import {readFileSync as rfs} from 'fs';
@@ -23,12 +24,11 @@ const [$1, $2, $3] = [math, atDoc, mouseEnter]
   .map((html) => load(html, {decodeEntities: false}));
 const logJson = (obj) => console.log(JSON.stringify(obj, null, 2));
 const ajv = new Ajv({allErrors: true});
-function testSchema(json) {
-  let valid = ajv.validate(
-    require('./../schemas/compat-data.schema.json'),
-    json,
-  );
+import schema from '../schemas/compat-data.schema.json';
+ajv.addSchema(schema, 'main');
 
+function testSchema(ref = 'main', json = {}) {
+  let valid = ajv.validate(ref, json);
   if (valid) {
     console.log('\x1b[32m  JSON schema – OK \x1b[0m');
     return false;
@@ -44,6 +44,11 @@ function testSchema(json) {
     return true;
   }
 }
+
+testSchema.ref = function(ref, json) {
+  return testSchema({$ref: `main#/definitions/${ref}`}, json);
+};
+
 describe('urlToPath', ()=>{
   it('outputs as expected', ()=>{
     let url = '//developer.mozilla.org/en-US/docs/Web/MathML/Element/math';
@@ -159,9 +164,14 @@ describe('parsing experiment', ()=>{
         {version_added: '1.5', version_removed: '61', prefix: '-moz-'},
       ]
     );
-    let json = parseTable(table.desktop, assembleNotes($2), $2);
+    notes = assembleNotes($2);
+    let json = parseTable(table.desktop, notes, $2);
     logJson(json);
-    testSchema(json);
+    testSchema.ref('support_block', json);
+    json = scrape($2);
+    logJson(json);
+    assert(testSchema.ref('identifier', mathml.elements.math));
+    assert(testSchema.ref('identifier', json));
   });
 });
 describe('cell parsing', ()=>{

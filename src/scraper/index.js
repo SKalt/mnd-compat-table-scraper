@@ -2,6 +2,7 @@
 /* eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }]*/
 import browserNames from './browser-names.json';
 import allBrowsers from './all-browsers.json';
+import {merge} from 'lodash';
 /**
  * Return whether we're on MDN
  * @param  {Object} loc window.location
@@ -131,23 +132,22 @@ function sortByBrowserName(support) {
     .reduce((a, r) => Object.assign(a, r), {});
 }
 
-export function parseRow(tr, notes={}, browserNames=[], $) {
+export function parseRow(tr, notes={}, browserNames = browserNames, $) {
   let [featureEl, ...supportEls] = $(tr).find('td').toArray();
-  let featureName = $(featureEl).text().trim();
-  let result = {
-    __compat: {
-      support: Object.assign(
-        ...supportEls.map(
-          (el, index) => {
-            let browser = browserNames[index];
-            return {[browser]: parseCell(el, notes, $)};
-          }
-        )
-      ),
-    },
+  let feature = $(featureEl).text().replace(
+    /^\s*basic\ssupport\s*$/i,
+    '__compat'
+  );
+  return {
+    [feature.replace(/^\s*basic\ssupport\s*$/i)]: Object.assign(
+      ...supportEls.map(
+        (el, index) => {
+          let browser = browserNames[index];
+          return {[browser]: parseCell(el, notes, $)};
+        }
+      )
+    ),
   };
-  if (!featureName.match(/basic\s+support/i)) result = {[featureName]: result};
-  return result;
 }
 
 export function parseTable(table, notes={}, $) {
@@ -169,18 +169,10 @@ function toOneIfPossible(acc, curr, index, arr) {
 export function scrape($) {
   const {mobile, desktop} = getTables($);
   const notes = assembleNotes($);
-  return Object.assign(
+  return merge(
     ...[mobile, desktop].map((el) => parseTable(el, notes, $))
   );
 }
 
-// export function status(featureEl, href = '', $) {
-//   let a = $(featureEl).find('a')
-//   href = href.replace('/[a-z]{2}-[A-Z]{2}/', '/').replace(/#.+$/, '');
-//   if (a.length > 0 && a[0].href.test(href))
-//   const check = (selector) => Boolean($(selector).toArray().length);
-//   let experimental = check('.notice.experimental');
-//   let standard_track = !experimental && check('#Specifications');
-//   let deprecated = !experimental && !standard_track && check('.deprecated');
-//   return {experimental, standard_track, deprecated};
-// };
+// if a featureEl has a link away from the current page, it may have its own
+// support statement
