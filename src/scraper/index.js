@@ -162,7 +162,7 @@ export function parseRow(tr, notes={}, browserNames = browserNames, $) {
     /^\s*basic\ssupport\s*$/i,
     '__compat'
   ).replace(/[^a-zA-Z_0-9-$@]/g, '');
-  let mdn_url = $(featureEl).find('a').attr('href')
+  let mdn_url = $(featureEl).find('a').attr('href');
   let status = parseStatus((s)=>$(featureEl).find(s).length || $(s).length);
   let compat = __compat(supportEls, notes, browserNames, status, mdn_url, $);
   return feature === '__compat' ? compat : {[feature]: compat};
@@ -183,7 +183,7 @@ function toOneIfPossible(acc, curr, index, arr) {
   return arr.length === 1 ? arr[0] : arr;
 }
 
-function getContext({location}){
+function getContext({location}) {
   const mdn_url = (
     location.origin
     + location.pathname.replace(/^\/[a-z]{2}-[A-Z]{2}/)
@@ -195,7 +195,7 @@ function getContext({location}){
 export function scrape($, globals) {
   const {mobile, desktop} = getTables($);
   const notes = assembleNotes($);
-  const {mdn_url, path, to, page} = getContext(globals);
+  const {path, to, page} = getContext(globals);
   return {
     [path]: {
       [to]: {
