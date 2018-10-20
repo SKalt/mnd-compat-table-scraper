@@ -24,7 +24,7 @@ const [$1, $2, $3] = [math, atDoc, mouseEnter]
   .map((html) => load(html, {decodeEntities: false}));
 const logJson = (obj) => console.log(JSON.stringify(obj, null, 2));
 const ajv = new Ajv({allErrors: true});
-import schema from '../schemas/compat-data.schema.json';
+import schema from 'mdn-browser-compat-data/schemas/compat-data.schema.json';
 ajv.addSchema(schema, 'main');
 
 function testSchema(ref = 'main', json = {}) {
