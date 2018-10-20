@@ -76,12 +76,15 @@ export const getNoteReference = (cell, $) => {
   );
 };
 
-export function status($) {
-  return {
-    experimental: Boolean($('.notice.experimental').length),
-    standard_track: !Boolean($('.nonStandard').length),
-    deprecated: Boolean($('.deprecated').length),
-  };
+export function parseStatus(find, $) {
+  if (!find) find = $;
+  let deprecated = Boolean(find('.deprecated').length);
+  let standard_track = !Boolean(find('.nonStandard').length);
+  let experimental = (
+    Boolean(find('.notice.experimental').length)
+    || (!standard_track && !deprecated)
+  );
+  return {experimental, standard_track, deprecated};
 }
 
 export function parseCellText(text) {
@@ -126,15 +129,17 @@ export function parseCell(cell, notes={}, $) {
   );
 }
 
-function sortByBrowserName(support) {
-  return allBrowsers
-    .map((name) => ({[name]: support[name]}))
-    .reduce((a, r) => Object.assign(a, r), {});
-}
-
-function __compat(supportEls, notes = {}, browserNames = browserNames, $) {
+function __compat(
+  supportEls,
+  /* ctx: {description: str, mdn_url: str, status: obj} */
+  notes = {},
+  browserNames = browserNames,
+  status = {},
+  $
+) {
   return {
     __compat: {
+      status,
       support: Object.assign(
         ...supportEls.map(
           (el, index) => {
@@ -153,9 +158,9 @@ export function parseRow(tr, notes={}, browserNames = browserNames, $) {
     /^\s*basic\ssupport\s*$/i,
     '__compat'
   ).replace(/[^a-zA-Z_0-9-$@]/g, '');
-  return feature === '__compat'
-    ? __compat(supportEls, notes, browserNames, $)
-    : {[feature]: __compat(supportEls, notes, browserNames, $)};
+  let status = parseStatus((s)=>$(featureEl).find(s).length || $(s).length);
+  let compat = __compat(supportEls, notes, browserNames, status, $);
+  return feature === '__compat' ? compat : {[feature]: compat};
 }
 
 export function parseTable(table, notes={}, $) {
