@@ -26,7 +26,7 @@ export function preprocess(url, ) {
 const ml = new Set(['svg', 'html', 'mathml']);
 const topLevel = new Set([
   ...ml, 'api', 'browsers', 'css', 'http', 'javascript',
-  'webdriver', 'webextensions',
+  'webdriver', 'webextensions', 'xpath', 'xslt',
 ]);
 
 
