@@ -5,7 +5,7 @@ import debug from 'debug';
 const logger = (name) => debug(`url-to-path:${name}`);
 // debug.enable('url-to-path:*');
 
-function preprocess(url, ) {
+export function preprocess(url, ) {
   const log = logger('preprocess');
   let {pathname, hostname} = parse(url);
   log(pathname, hostname);

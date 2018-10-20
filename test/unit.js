@@ -30,15 +30,17 @@ debug.enable('unit-test:*');
 const logger = (name) => debug('unit-test:' + name);
 
 ajv.addSchema(schema, 'main');
-const schemaErrorLogger = (ref) => logger('schema:' + ref.constructor === String ? ref : ref.$ref);
+const schemaErrorLogger = (ref) => logger(
+  'schema:' + ref.constructor === String ? ref : ref.$ref
+);
 function testSchema(ref = 'main', json = {}) {
   const log = schemaErrorLogger(ref);
   let valid = ajv.validate(ref, json);
   if (valid) {
-    log('ok')
+    log('ok');
     return false;
   } else {
-    log({json})
+    log({json});
     log(`\x1b[31m ${ajv.errors.length} error(s)\x1b[0m`);
     log(ajv.errors);
     log('   ' + ajv.errorsText(ajv.errors, {

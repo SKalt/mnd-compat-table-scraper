@@ -2,6 +2,7 @@
 /* eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }]*/
 import browserNames from './browser-names.json';
 import allBrowsers from './all-browsers.json';
+import {preprocess as parseUrl} from '../url-to-path.js';
 import {merge} from 'lodash';
 /**
  * Return whether we're on MDN
@@ -65,7 +66,7 @@ export function getBrowserNames(table, $) {
 export function getFeatureNames(table, $) {
   return $(table).find('td:first-child, th:first-child')
     .toArray().slice(1)
-    .map((el) => $(el).text());
+    .map((el) => $(el).text().trim());
 }
 
 export const getNoteReference = (cell, $) => {
@@ -135,9 +136,10 @@ function __compat(
   notes = {},
   browserNames = browserNames,
   status = {},
+  mdn_url = '',
   $
 ) {
-  return {
+  const result = {
     __compat: {
       status,
       support: Object.assign(
@@ -150,6 +152,8 @@ function __compat(
       ),
     },
   };
+  if (mdn_url) result.__compat.mdn_url = mdn_url;
+  return result;
 }
 
 export function parseRow(tr, notes={}, browserNames = browserNames, $) {
@@ -158,8 +162,9 @@ export function parseRow(tr, notes={}, browserNames = browserNames, $) {
     /^\s*basic\ssupport\s*$/i,
     '__compat'
   ).replace(/[^a-zA-Z_0-9-$@]/g, '');
+  let mdn_url = $(featureEl).find('a').attr('href')
   let status = parseStatus((s)=>$(featureEl).find(s).length || $(s).length);
-  let compat = __compat(supportEls, notes, browserNames, status, $);
+  let compat = __compat(supportEls, notes, browserNames, status, mdn_url, $);
   return feature === '__compat' ? compat : {[feature]: compat};
 }
 
@@ -167,7 +172,6 @@ export function parseTable(table, notes={}, $) {
   const [header, ...rows] = $(table).find('tr').toArray();
   const browserNames = getBrowserNames(header, $);
   return Object.assign(
-    {},
     ...rows.map((tr) => parseRow(tr, notes, browserNames, $))
   );
 }
@@ -179,12 +183,28 @@ function toOneIfPossible(acc, curr, index, arr) {
   return arr.length === 1 ? arr[0] : arr;
 }
 
-export function scrape($) {
+function getContext({location}){
+  const mdn_url = (
+    location.origin
+    + location.pathname.replace(/^\/[a-z]{2}-[A-Z]{2}/)
+  );
+  const [path, to, page] = parseUrl(mdn_url);
+  return {mdn_url};
+}
+
+export function scrape($, globals) {
   const {mobile, desktop} = getTables($);
   const notes = assembleNotes($);
-  return merge(
-    ...[mobile, desktop].map((el) => parseTable(el, notes, $))
-  );
+  const {mdn_url, path, to, page} = getContext(globals);
+  return {
+    [path]: {
+      [to]: {
+        [page]: merge(
+          ...[mobile, desktop].map((el) => parseTable(el, notes, $))
+        ),
+      },
+    },
+  };
 }
 
 // if a featureEl has a link away from the current page, it may have its own
