@@ -11,7 +11,7 @@ import {
   parseCell,
   getNoteReference,
   scrape,
-} from '../src/scraper/index.js';
+} from '../src/index.js';
 // import path from 'path';
 import {urlToPath} from '../src/url-to-path';
 import assert from 'assert';
