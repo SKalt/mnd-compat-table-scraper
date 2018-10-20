@@ -1,8 +1,9 @@
 /* eslint-disable require-jsdoc, max-len */
 /* eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }]*/
 import browserNames from './browser-names.json';
-import allBrowsers from './all-browsers.json';
-import {preprocess as parseUrl} from '../url-to-path.js';
+import _allBrowsers from './all-browsers.json';
+const allBrowsers = new Set(_allBrowsers)
+import {preprocess as parseUrl} from './url-to-path.js';
 import {merge} from 'lodash';
 /**
  * Return whether we're on MDN
@@ -55,12 +56,19 @@ export function assembleNotes($) {
 export const getRows = (table, $) => $(table).find('tr').toArray();
 export const getHeaders = (table, $) => $(table).find('th').toArray();
 
-export function getBrowserName(th, $) {
-  return browserNames[$(th).text().trim()];
+export function getBrowserName(th, isMobile = false, $) {
+  const text = $(th).text().trim();
+  if (isMobile) {
+    let mobilized = browserNames[`${text} Mobile`];
+    if (mobilized) return mobilized;
+  }
+  return browserNames[$(th).text().trim()] || text;
 }
 
-export function getBrowserNames(table, $) {
-  return getHeaders(table, $).slice(1).map((th) => getBrowserName(th, $));
+export function getBrowserNames(table, isMobile = false, $) {
+  return getHeaders(table, $)
+    .slice(1)
+    .map((th) => getBrowserName(th, isMobile, $));
 }
 
 export function getFeatureNames(table, $) {
@@ -104,7 +112,7 @@ export function parseCellText(text) {
 export function parseCell(cell, notes={}, $) {
   if ($(cell).find('br').toArray().length) {
     return $(cell).html()
-      .split(/<\s*br\s*\/>/ig)
+      .split(/<\s*br\s*\/?>/ig)
       .map((str) => parseCell(`<td>${str}</td>`, notes, $))
       .reduce(toOneIfPossible, []);
   }
@@ -146,7 +154,14 @@ function __compat(
         ...supportEls.map(
           (el, index) => {
             let browser = browserNames[index];
-            return {[browser]: parseCell(el, notes, $)};
+            if (!allBrowsers.has(browser)) {
+              console.error(
+                browser + ' is not included in the compat data schema'
+              );
+              return {}
+            } else {
+              return  {[browser]: parseCell(el, notes, $)};
+            }
           }
         )
       ),
@@ -168,9 +183,9 @@ export function parseRow(tr, notes={}, browserNames = browserNames, $) {
   return feature === '__compat' ? compat : {[feature]: compat};
 }
 
-export function parseTable(table, notes={}, $) {
+export function parseTable(table, notes={}, isMobile = false, $) {
   const [header, ...rows] = $(table).find('tr').toArray();
-  const browserNames = getBrowserNames(header, $);
+  const browserNames = getBrowserNames(header, isMobile, $);
   return Object.assign(
     ...rows.map((tr) => parseRow(tr, notes, browserNames, $))
   );
@@ -189,22 +204,21 @@ function getContext({location}) {
     + location.pathname.replace(/^\/[a-z]{2}-[A-Z]{2}/)
   );
   const [path, to, page] = parseUrl(mdn_url);
-  return {mdn_url};
+  return {mdn_url, path, to, page};
 }
 
 export function scrape($, globals) {
   const {mobile, desktop} = getTables($);
   const notes = assembleNotes($);
   const {path, to, page} = getContext(globals);
-  return {
-    [path]: {
-      [to]: {
-        [page]: merge(
-          ...[mobile, desktop].map((el) => parseTable(el, notes, $))
-        ),
-      },
-    },
-  };
+  const data = merge(
+    parseTable(mobile, notes, true, $),
+    parseTable(desktop, notes, false, $),
+  );
+
+  return page
+    ? {[path]: {[to]: {[page]: data}}}
+    : {[path]: {[to]: data}};
 }
 
 // if a featureEl has a link away from the current page, it may have its own

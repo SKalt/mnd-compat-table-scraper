@@ -11,6 +11,8 @@
   "Firefox (Gecko)": "firefox",
   "Firefox": "firefox",
   "Firefox Mobile (Gecko)": "firefox_android",
+  "Firefox Mobile": "firefox_android",
+  "Firefox mobile": "firefox_android",
   "Firefox for Android": "firefox_android",
   "Internet Explorer": "ie",
   "Opera": "opera",
@@ -20,7 +22,7 @@
   "Safari": "safari",
   "Safari Mobile": "safari_ios",
   "iOS Safari": "safari_ios",
-  "Samsung Internet": "samsung",
+  "Samsung Internet": "samsunginternet_android",
   "Android": "webview_android",
   "Android Webview": "webview_android",
   "Android webview": "webview_android"
