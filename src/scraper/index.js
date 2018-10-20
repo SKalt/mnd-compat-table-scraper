@@ -132,22 +132,30 @@ function sortByBrowserName(support) {
     .reduce((a, r) => Object.assign(a, r), {});
 }
 
+function __compat(supportEls, notes = {}, browserNames = browserNames, $) {
+  return {
+    __compat: {
+      support: Object.assign(
+        ...supportEls.map(
+          (el, index) => {
+            let browser = browserNames[index];
+            return {[browser]: parseCell(el, notes, $)};
+          }
+        )
+      ),
+    },
+  };
+}
+
 export function parseRow(tr, notes={}, browserNames = browserNames, $) {
   let [featureEl, ...supportEls] = $(tr).find('td').toArray();
   let feature = $(featureEl).text().replace(
     /^\s*basic\ssupport\s*$/i,
     '__compat'
-  );
-  return {
-    [feature.replace(/^\s*basic\ssupport\s*$/i)]: Object.assign(
-      ...supportEls.map(
-        (el, index) => {
-          let browser = browserNames[index];
-          return {[browser]: parseCell(el, notes, $)};
-        }
-      )
-    ),
-  };
+  ).replace(/[^a-zA-Z_0-9-$@]/g, '');
+  return feature === '__compat'
+    ? __compat(supportEls, notes, browserNames, $)
+    : {[feature]: __compat(supportEls, notes, browserNames, $)};
 }
 
 export function parseTable(table, notes={}, $) {

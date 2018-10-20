@@ -13,7 +13,7 @@ import {
   scrape,
 } from '../src/scraper/index.js';
 // import path from 'path';
-import {mathml} from './temp.json';
+import root from 'mdn-browser-compat-data/mathml/elements/math.json';
 import {urlToPath} from '../src/url-to-path';
 import assert from 'assert';
 // import {readFileSync as rfs} from 'fs';
@@ -25,23 +25,27 @@ const [$1, $2, $3] = [math, atDoc, mouseEnter]
 const logJson = (obj) => console.log(JSON.stringify(obj, null, 2));
 const ajv = new Ajv({allErrors: true});
 import schema from 'mdn-browser-compat-data/schemas/compat-data.schema.json';
-ajv.addSchema(schema, 'main');
+import debug from 'debug';
+debug.enable('unit-test:*');
+const logger = (name) => debug('unit-test:' + name);
 
+ajv.addSchema(schema, 'main');
+const schemaErrorLogger = (ref) => logger('schema:' + ref.constructor === String ? ref : ref.$ref);
 function testSchema(ref = 'main', json = {}) {
+  const log = schemaErrorLogger(ref);
   let valid = ajv.validate(ref, json);
   if (valid) {
-    console.log('\x1b[32m  JSON schema – OK \x1b[0m');
+    log('ok')
     return false;
   } else {
-    console.error(
-      `\x1b[31m  JSON schema – ${ajv.errors.length} error(s)\x1b[0m`
-    );
-    console.error(ajv.errors);
-    console.error('   ' + ajv.errorsText(ajv.errors, {
+    log({json})
+    log(`\x1b[31m ${ajv.errors.length} error(s)\x1b[0m`);
+    log(ajv.errors);
+    log('   ' + ajv.errorsText(ajv.errors, {
       separator: '\n    ',
       dataVar: 'item',
     }));
-    return true;
+    assert(!ajv.errors);
   }
 }
 
@@ -125,6 +129,11 @@ describe('getFeatureNames', ()=>{
 });
 
 describe('parsing experiment', ()=>{
+  it('can validate stuff', ()=>{
+    testSchema(root);
+    testSchema.ref('identifier', root.mathml);
+    testSchema.ref('identifier', root.mathml.math);
+  });
   it('correctly parses tables', ()=>{
     let table = getTables($1);
     let notes = assembleNotes($1);
@@ -167,11 +176,11 @@ describe('parsing experiment', ()=>{
     notes = assembleNotes($2);
     let json = parseTable(table.desktop, notes, $2);
     logJson(json);
-    testSchema.ref('support_block', json);
-    json = scrape($2);
-    logJson(json);
-    assert(testSchema.ref('identifier', mathml.elements.math));
-    assert(testSchema.ref('identifier', json));
+    // testSchema.ref('support_block', json);
+    // json = scrape($2);
+    // logJson(json);
+    // testSchema.ref('identifier', root.mathml.elements.math);
+    testSchema.ref('identifier', json);
   });
 });
 describe('cell parsing', ()=>{
