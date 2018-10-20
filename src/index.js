@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }]*/
 import browserNames from './browser-names.json';
 import _allBrowsers from './all-browsers.json';
-const allBrowsers = new Set(_allBrowsers)
+const allBrowsers = new Set(_allBrowsers);
 import {preprocess as parseUrl} from './url-to-path.js';
 import {merge} from 'lodash';
 /**
@@ -158,9 +158,9 @@ function __compat(
               console.error(
                 browser + ' is not included in the compat data schema'
               );
-              return {}
+              return {};
             } else {
-              return  {[browser]: parseCell(el, notes, $)};
+              return {[browser]: parseCell(el, notes, $)};
             }
           }
         )
