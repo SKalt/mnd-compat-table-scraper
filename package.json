@@ -34,7 +34,7 @@
     "test": "mocha ./dist/unit.js",
     "prepush": "npm run lint && npm run test",
     "lint": "eslint src/ --fix",
-    "build": "parcel build -t browser ./src/main.js"
+    "build": "parcel build -t browser --experimental-scope-hoisting ./src/main.js"
   },
   "repository": {
     "type": "git",
