@@ -18,6 +18,7 @@ ping.then((ok) => {
   console.info(message);
 });
 const scraped = scrape(window.$, window);
+window.scraped = scraped;
 const valid = ajv.validate('main', scraped);
 if (valid) {
   console.log(
@@ -33,5 +34,4 @@ if (valid) {
   }));
   console.error('see ' + gh('compat-data.schema.md') + ' for more info.');
 }
-// if not exists, check `https://github.com/mdn/mdn-browser-compat-data/`
-console.log(scraped);
+console.log('the scraped data (available via `window.scraped`)', scraped);
