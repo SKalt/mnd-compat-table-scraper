@@ -223,4 +223,4 @@ export function scrape($, globals) {
 
 // if a featureEl has a link away from the current page, it may have its own
 // support statement
-export {urlToPath} from './url-to-path.js'
+export {urlToPath} from './url-to-path.js';
