@@ -34,8 +34,9 @@
     "test": "mocha ./dist/unit.js",
     "prepush": "yarn run lint && yarn run test",
     "lint": "eslint src/ --fix",
+    "prebuild": "yarn run lint",
     "build": "parcel build -t browser --experimental-scope-hoisting ./src/main.js",
-    "deploy": "PROJECT_VERSION=$(git rev-parse HEAD) yarn run lint && yarn run build && git checkout gh-pages && git add -f ./dist/main.js && git commit -m \"deploying $PROJECT_VERSION\" && git push && git checkout master"
+    "deploy": "PROJECT_VERSION=$(git rev-parse HEAD) yarn run build && cd dist && git commit -am \"deploying $PROJECT_VERSION\" && git push && cd .."
   },
   "repository": {
     "type": "git",
