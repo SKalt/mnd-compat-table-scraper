@@ -34,4 +34,5 @@ if (valid) {
   }));
   console.error('see ' + gh('compat-data.schema.md') + ' for more info.');
 }
-console.log('the scraped data (available via `window.scraped`)', scraped);
+console.log('the scraped data (available via `window.scraped`)')
+console.log(scraped);
