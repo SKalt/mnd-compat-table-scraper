@@ -35,8 +35,8 @@
     "prepush": "yarn run lint && yarn run test",
     "lint": "eslint src/ --fix",
     "prebuild": "yarn run lint",
-    "build": "parcel build -t browser --experimental-scope-hoisting ./src/main.js",
-    "deploy": "PROJECT_VERSION=$(git rev-parse HEAD); yarn run build && cd dist && git commit -am \"deploying $PROJECT_VERSION\" && git push && cd .."
+    "build": "parcel build -t browser ./src/main.js",
+    "deploy": "PROJECT_VERSION=$(git rev-parse HEAD); yarn run build && node ./src/make-bookmarklet-link.js && cd dist && git commit -am \"deploying $PROJECT_VERSION\" && git push && cd .."
   },
   "repository": {
     "type": "git",

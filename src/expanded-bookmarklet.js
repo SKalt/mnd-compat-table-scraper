@@ -1,9 +1,9 @@
 (
   (
     ()=>{
-      fetch('https://skalt.github.io/mdn-compat-table-scraper/main.js')
-        .then((r) => r.text())
-        .then((js) => eval(js));
+      const script = document.createElement('script');
+      script.src = '//skalt.github.io/mdn-compat-table-scraper/main.js';
+      document.body.appendChild(script);
     }
   )()
 );
