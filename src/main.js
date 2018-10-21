@@ -11,7 +11,7 @@ const path = urlToPath(window.location.href);
 const gh = (p) => `https://github.com/mdn/browser-compat-data/blob/master/${p}`;
 gh.raw = (p) => gh(p).replace('github', 'raw.githubusercontent');
 const ping = async () => await fetch(gh.raw(path)).then((r) => r.ok);
-ping.then((ok) => {
+ping().then((ok) => {
   const message = ok
     ? `this entry already exists at ${gh(path)}`
     : `this entry isn't yet in ${gh('').repalace('/blob/master')}`;
