@@ -14,7 +14,7 @@ const ping = async () => await fetch(gh.raw(path)).then((r) => r.ok);
 ping().then((ok) => {
   const message = ok
     ? `this entry already exists at ${gh(path)}`
-    : `this entry isn't yet in ${gh('').repalace('/blob/master')}`;
+    : `this entry isn't yet in ${gh('').replace('/blob/master')}`;
   console.info(message);
 });
 const scraped = scrape(window.$, window);
