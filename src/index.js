@@ -211,11 +211,49 @@ export function scrape($, globals) {
   const {mobile, desktop} = getTables($);
   const notes = assembleNotes($);
   const {path, to, page} = getContext(globals);
-  const data = merge(
+  let data = merge(
     parseTable(mobile, notes, true, $),
     parseTable(desktop, notes, false, $),
   );
-
+  // console.log(JSON.stringify(data, null, 2));
+  const inBrowserOrder = ({support, ...rest}) => {
+    return {
+      ...rest,
+      support: merge(
+        ..._allBrowsers.map(
+          (b) => ({
+            [b]: support[b] || {version_added: null},
+          })
+        )
+      ),
+    };
+  };
+  data = merge(
+    ...Object.entries(data)
+      .map(
+        ([feature, value]) =>{
+          if (feature === '__compat') return {__compat: inBrowserOrder(value)};
+          let {__compat, ...rest} = value;
+          return {__compat: inBrowserOrder(__compat), ...rest};
+        }
+      )
+  );
+  // // console.log(Object.keys(data));
+  // data = merge(
+  //   ...Object.entries(data)
+  //     .map(([compat, support]) => {
+  //       return {
+  //         [compat]: merge(
+  //           ..._allBrowsers
+  //             .map(
+  //               (browswer) => ({
+  //                 [browswer]: support[browswer] || {version_added: null},
+  //               })
+  //             )
+  //         ),
+  //       };
+  //     })
+  // );
   return page
     ? {[path]: {[to]: {[page]: data}}}
     : {[path]: {[to]: data}};
