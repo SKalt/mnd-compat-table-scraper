@@ -30,12 +30,11 @@
     "last 2 Firefox versions"
   ],
   "scripts": {
+    "lint": "eslint src/ --fix",
     "pretest": "clear && parcel build --no-minify ./test/unit.js",
     "test": "mocha ./dist/unit.js",
-    "prepush": "yarn run lint && yarn run test",
-    "lint": "eslint src/ --fix",
-    "prebuild": "yarn run lint",
     "build": "parcel build -t browser --public-url https://skalt.github.io/mdn-compat-table-scraper/ ./src/main.js",
+    "preversion": "yarn run lint && yarn run test",
     "deploy": "PROJECT_VERSION=$(git describe --tag HEAD 2>/dev/null || git rev-parse --short HEAD); yarn run build && node ./src/post-production.js && cd dist && git commit -am \"deploying $PROJECT_VERSION\" && git push && cd .. && git add dist && git commit -m 'submodule sync' && git push;",
     "postversion": "yarn run deploy"
   },
