@@ -1,6 +1,6 @@
 /* eslint-env browser */
 import {scrape, urlToPath} from './index.js';
-import {version} from '../package.json'
+import {version} from '../package.json';
 // JSON schema validation
 import Ajv from 'ajv';
 import schema from 'mdn-browser-compat-data/schemas/compat-data.schema.json';
