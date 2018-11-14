@@ -33,7 +33,10 @@ function getNoteId(el, $) {
 }
 
 export function getNotesElements($) {
-  return $('div.htab').nextUntil('h2, h1, hr', 'p').toArray();
+  const find = ($el) => $el.nextUntil('h2, h1, hr', 'p').toArray();
+  let els = find($('div.htab'));
+  if (!els.length) els = els.concat(find($('div.htab').parent()));
+  return els;
 }
 
 export function getNoteText(el, $) {
@@ -234,7 +237,7 @@ export function scrape($, globals) {
         ([feature, value]) =>{
           if (feature === '__compat') return {__compat: inBrowserOrder(value)};
           let {__compat, ...rest} = value;
-          return {__compat: inBrowserOrder(__compat), ...rest};
+          return {[feature]: {__compat: inBrowserOrder(__compat), ...rest}};
         }
       )
   );
